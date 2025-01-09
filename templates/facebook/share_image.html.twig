@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partager une image sur Facebook{% endblock %}
+
+{% block body %}
+    <h1>Partager une image sur Facebook</h1>
+
+    {{ form_start(form, {'action': path('facebook_share_image'), 'method': 'POST'}) }}
+        {{ form_row(form.image) }}
+        {{ form_row(form.share) }}
+    {{ form_end(form) }}
+{% endblock %}

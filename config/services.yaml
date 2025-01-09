@@ -4,8 +4,18 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    uploads_directory: '%kernel.project_dir%/public/uploads'
 
 services:
+    Symfony\Component\HttpFoundation\Session\SessionInterface:
+        alias: 'session'
+    Facebook\Facebook:
+        arguments:
+            $config:
+                app_id: '%env(FACEBOOK_APP_ID)%'
+                app_secret: '%env(FACEBOOK_APP_SECRET)%'
+                default_graph_version: 'v21.0'
+
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
@@ -19,6 +29,7 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

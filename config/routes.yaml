@@ -3,3 +3,22 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+
+# Route pour la connexion Facebook
+facebook_login:
+    path: /facebook/login
+    controller: App\Controller\FacebookImageController::loginWithFacebook
+    methods: [GET]
+
+# Route pour le callback Facebook
+facebook_callback:
+    path: /facebook/callback
+    controller: App\Controller\FacebookImageController::facebookCallback
+    methods: [GET]
+
+# Route pour le partage d'image
+facebook_share_image:
+    path: /facebook/share-image
+    controller: App\Controller\FacebookImageController::shareImage
+    methods: [GET, POST]
