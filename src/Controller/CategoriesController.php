@@ -24,13 +24,20 @@ class CategoriesController extends AbstractController
     }
 
     #[Route('/categories/new', name: 'app_categories_new')]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, CategoriesRepository $categoriesRepository, EntityManagerInterface $entityManager): Response
     {
         $category = new Categories();
         $form = $this->createForm(CategoriesType::class, $category);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // On verifie que la catégorie n'existe pas
+            $existingCategory = $categoriesRepository->findOneByName($category->getName());
+            if ($existingCategory) {
+                $this->addFlash('error', 'Une catégorie avec ce nom existe déjà.');
+                return $this->redirectToRoute('app_categories_new');
+            }
+
             $entityManager->persist($category);
             $entityManager->flush();
 
