@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Plat2
+{% endblock %}
+
+{% block body %}
+	<h1>Edit Plat2</h1>
+	<div class="bloc">
+		{{ include('plat2/_form.html.twig', {'button_label': 'Update'}) }}
+
+		<a href="{{ path('app_plat2_index') }}">back to list</a>
+
+		{{ include('plat2/_delete_form.html.twig') }}
+	</div>
+{% endblock %}

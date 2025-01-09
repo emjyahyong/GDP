@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Plat2 index{% endblock %}
+
+{% block body %}
+    <h1>Plat2 index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Prix</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for plat2 in plat2s %}
+            <tr>
+                <td>{{ plat2.id }}</td>
+                <td>{{ plat2.Nom }}</td>
+                <td>{{ plat2.Description }}</td>
+                <td>{{ plat2.Prix }}</td>
+                <td>
+                    <a href="{{ path('app_plat2_show', {'id': plat2.id}) }}">show</a>
+                    <a href="{{ path('app_plat2_edit', {'id': plat2.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_plat2_new') }}">Create new</a>
+{% endblock %}
