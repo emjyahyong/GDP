@@ -1,0 +1,4 @@
+parameters:
+    uber_eats.client_id: '%env(UBER_EATS_CLIENT_ID)%'
+    uber_eats.client_secret: '%env(UBER_EATS_CLIENT_SECRET)%'
+    uber_eats.store_id: '%env(UBER_EATS_STORE_ID)%'
