@@ -84,7 +84,7 @@ class CategoriesController extends AbstractController
                 $entityManager->flush();
             }
             $this->addFlash('error', 'Cette catégorie nexiste pas');
-            return $this->redirectToRoute('app_categories_edit', ['id' => $category->getId()]);
+            return $this->redirectToRoute('app_categories');
         }
 
         return $this->redirectToRoute('app_categories');
