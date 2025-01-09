@@ -75,11 +75,16 @@ class CategoriesController extends AbstractController
     }
 
     #[Route('/categories/{id}/delete', name: 'app_categories_delete', methods: ['POST'])]
-    public function delete(Request $request, Categories $category, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Categories $category, CategoriesRepository $categoriesRepository, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $category->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($category);
-            $entityManager->flush();
+            $existingCategory = $categoriesRepository->findOneByName($category->getName());
+            if ($existingCategory && $existingCategory->getId() !== $category->getId()) {
+                $entityManager->remove($category);
+                $entityManager->flush();
+            }
+            $this->addFlash('error', 'Cette catégorie nexiste pas');
+            return $this->redirectToRoute('app_categories_edit', ['id' => $category->getId()]);
         }
 
         return $this->redirectToRoute('app_categories');
