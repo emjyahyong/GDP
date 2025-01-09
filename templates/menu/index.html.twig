@@ -19,6 +19,11 @@
                 <td>
                     <a href="{{ path('app_menu_show', {'id': menu.id}) }}">show</a>
                     <a href="{{ path('app_menu_edit', {'id': menu.id}) }}">edit</a>
+                    <div class="uber-eats-status">
+                        <small class="text-success">
+                            <i class="fas fa-sync-alt"></i> Synchronisé avec Uber Eats
+                        </small>
+                    </div>
                 </td>
             </tr>
         {% else %}
@@ -30,4 +35,15 @@
     </table>
 
     <a href="{{ path('app_menu_new') }}">Create new</a>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .uber-eats-status {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+    </style>
 {% endblock %}
