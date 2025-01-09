@@ -88,7 +88,7 @@ class MenuController extends AbstractController
         ]);
     }
 
-    #[Route('/orders', name: 'app_menu_orders', methods: ['GET'])]
+    #[Route('/uber-eats/orders', name: 'app_menu_orders', methods: ['GET'])]
     public function orders(): Response
     {
         try {
@@ -102,7 +102,7 @@ class MenuController extends AbstractController
         }
     }
 
-    #[Route('/orders/{orderId}/status', name: 'app_menu_order_status', methods: ['POST'])]
+    #[Route('/uber-eats/orders/{orderId}/status', name: 'app_menu_order_status', methods: ['POST'])]
     public function updateOrderStatus(string $orderId, Request $request): Response
     {
         $status = $request->request->get('status');
