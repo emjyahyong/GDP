@@ -50,12 +50,19 @@ class CategoriesController extends AbstractController
     }
 
     #[Route('/categories/{id}/edit', name: 'app_categories_edit')]
-    public function edit(Request $request, Categories $category, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Categories $category, CategoriesRepository $categoriesRepository, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(CategoriesType::class, $category);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // On check si la catégorie existe déjà
+            $existingCategory = $categoriesRepository->findOneByName($category->getName());
+            if ($existingCategory && $existingCategory->getId() !== $category->getId()) {
+                $this->addFlash('error', 'Une catégorie avec ce nom existe déjà.');
+                return $this->redirectToRoute('app_categories_edit', ['id' => $category->getId()]);
+            }
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_categories');
