@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Menu;
 use App\Form\MenuType;
 use App\Repository\MenuRepository;
+use App\Service\UberEatsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,9 +13,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/menu')]
-final class MenuController extends AbstractController
+class MenuController extends AbstractController
 {
-    #[Route(name: 'app_menu_index', methods: ['GET'])]
+    private $uberEatsService;
+
+    public function __construct(UberEatsService $uberEatsService)
+    {
+        $this->uberEatsService = $uberEatsService;
+    }
+
+    #[Route('/', name: 'app_menu_index', methods: ['GET'])]
     public function index(MenuRepository $menuRepository): Response
     {
         return $this->render('menu/index.html.twig', [
@@ -30,14 +38,26 @@ final class MenuController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($menu);
-            $entityManager->flush();
+            try {
+                // Sauvegarder dans la base de données locale
+                $entityManager->persist($menu);
+                $entityManager->flush();
 
-            return $this->redirectToRoute('app_menu_index', [], Response::HTTP_SEE_OTHER);
+                // Synchroniser avec Uber Eats
+                try {
+                    $this->uberEatsService->syncMenu($menu);
+                    $this->addFlash('success', 'Le menu a été créé et synchronisé avec Uber Eats avec succès');
+                } catch (\Exception $e) {
+                    $this->addFlash('warning', 'Le menu a été créé mais la synchronisation avec Uber Eats a échoué: ' . $e->getMessage());
+                }
+
+                return $this->redirectToRoute('app_menu_index');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la création du menu');
+            }
         }
 
         return $this->render('menu/new.html.twig', [
-            'menu' => $menu,
             'form' => $form,
         ]);
     }
@@ -58,8 +78,8 @@ final class MenuController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_menu_index', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash('success', 'Le menu a été modifié avec succès');
+            return $this->redirectToRoute('app_menu_index');
         }
 
         return $this->render('menu/edit.html.twig', [
@@ -68,14 +88,44 @@ final class MenuController extends AbstractController
         ]);
     }
 
+    #[Route('/orders', name: 'app_menu_orders', methods: ['GET'])]
+    public function orders(): Response
+    {
+        try {
+            $orders = $this->uberEatsService->getOrders();
+            return $this->render('menu/orders.html.twig', [
+                'orders' => $orders
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de la récupération des commandes Uber Eats: ' . $e->getMessage());
+            return $this->redirectToRoute('app_menu_index');
+        }
+    }
+
+    #[Route('/orders/{orderId}/status', name: 'app_menu_order_status', methods: ['POST'])]
+    public function updateOrderStatus(string $orderId, Request $request): Response
+    {
+        $status = $request->request->get('status');
+        
+        try {
+            $this->uberEatsService->updateOrderStatus($orderId, $status);
+            $this->addFlash('success', 'Statut de la commande mis à jour avec succès');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de la mise à jour du statut: ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_menu_orders');
+    }
+
     #[Route('/{id}', name: 'app_menu_delete', methods: ['POST'])]
     public function delete(Request $request, Menu $menu, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$menu->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$menu->getId(), $request->request->get('_token'))) {
             $entityManager->remove($menu);
             $entityManager->flush();
+            $this->addFlash('success', 'Le menu a été supprimé avec succès');
         }
 
-        return $this->redirectToRoute('app_menu_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_menu_index');
     }
 }
